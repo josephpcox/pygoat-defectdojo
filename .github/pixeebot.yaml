@@ -1,0 +1,3 @@
+additional_codemods:
+  - defectdojo:python/django-secure-set-cookie
+  - defectdojo:python/avoid-insecure-deserialization
