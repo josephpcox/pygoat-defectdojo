@@ -1,0 +1,29 @@
+name: "Publish DefectDojo JSON to Pixee"
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: "Publish Sonar JSON to Pixee"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Publish DefectDojo JSON to Pixee"
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+        run: |
+          URL="$DEFECTDOJO_URL/api/v2/findings/\?limit\=200\&offset\=0\&product_name\=pygoat_demo"
+          curl -v -H "Authorization: Token $DEFECTDOJO_TOKEN" "$URL" -o defectdojo.findings.json
+
+          cat defectdojo.findings.json
+
+          ANALYSIS_SHA=${{ github.event.check_run.head_sha }}
+          SECRET=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://app.pixee.ai" | jq -j '.value')
+          API_RESPONSE=$(curl -v -X PUT -H "Authorization: Bearer $SECRET" -H "Content-Type: multipart/form-data" -F "file=@defectdojo.findings.json" "https://api.pixee.ai/analysis-input/PixeeSandbox/pygoat-defectdojo/$ANALYSIS_SHA/defectdojo")
+          echo "$API_RESPONSE"
