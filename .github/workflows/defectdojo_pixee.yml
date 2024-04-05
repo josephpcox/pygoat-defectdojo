@@ -18,7 +18,7 @@ jobs:
           DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
         run: |
-          URL="$DEFECTDOJO_URL/api/v2/findings/\?limit\=200\&offset\=0\&product_name\=pygoat_demo"
+          URL="$DEFECTDOJO_URL/api/v2/findings/?limit=200&offset=0&product_name=pygoat_demo"
           curl -v -H "Authorization: Token $DEFECTDOJO_TOKEN" "$URL" -o defectdojo.findings.json
 
           cat defectdojo.findings.json
