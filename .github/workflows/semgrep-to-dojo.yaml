@@ -7,6 +7,10 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   semgrep-sast-scan-to-defectdojo:
     name: semgrep sast scan
