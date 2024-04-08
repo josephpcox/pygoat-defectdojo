@@ -55,7 +55,7 @@ jobs:
           SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           rule_id="python.django.security.audit.secure-cookies.django-secure-set-cookie"
-          URL="$DEFECTDOJO_URL/api/v2/findings/?commit_hash=$SHA&title=$rule_id&product_name=pygoat_demo"
+          URL="$DEFECTDOJO_URL/api/v2/findings/?commit_hash=$SHA&title=$rule_id&product_name=pygoat_demo&limit=2000"
           curl -v -H "Authorization: Token $DEFECTDOJO_TOKEN" "$URL" -o defectdojo.findings.json
 
           cat defectdojo.findings.json
