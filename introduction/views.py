@@ -308,7 +308,7 @@ def auth_lab_login(request):
             try:
                 rendered = render_to_string('Lab/AUTH/auth_success.html', {'username': obj.username,'userid':obj.userid,'name':obj.name, 'err_msg':'Login Successful'})
                 response = HttpResponse(rendered)
-                response.set_cookie('userid', obj.userid, max_age=31449600, samesite=None, secure=False)
+                response.set_cookie('userid', obj.userid, max_age=31449600)
                 print('Login successful')
                 return response
             except:
