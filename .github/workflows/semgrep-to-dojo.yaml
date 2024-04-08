@@ -2,10 +2,10 @@ name: semgrep-sast-scan-and-import-to-defectdojo
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   semgrep-sast-scan-to-defectdojo:
