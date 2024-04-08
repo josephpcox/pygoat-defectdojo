@@ -52,7 +52,7 @@ jobs:
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
           REPO_NAME: ${{ github.event.repository.name }}
           REPO_OWNER: ${{ github.event.repository_owner }}
-          SHA: ${{ github.sha }}
+          SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           rule_id="python.django.security.audit.secure-cookies.django-secure-set-cookie"
           URL="$DEFECTDOJO_URL/api/v2/findings/?commit_hash=$SHA&title=$rule_id&product_name=pygoat_demo"
