@@ -41,6 +41,8 @@ import requests
 import re
 #*****************************************Login and Registration****************************************************#
 
+print("HELLO DEMO")
+
 def register(request):
 	if request.method == "POST":
 		form = NewUserForm(request.POST)
