@@ -1,12 +1,8 @@
 import hashlib
 from django.shortcuts import render,redirect
-from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
-from .models import  FAANG, AF_session_id,info,login,comments,authLogin, tickits, sql_lab_table,Blogs,CF_user,AF_admin
-from django.core import serializers
-from requests.structures import CaseInsensitiveDict
-from django.contrib.auth import login,authenticate
-from django.contrib.auth.forms import UserCreationForm
-import random
+from django.http import HttpResponse, HttpResponseBadRequest
+from .models import  FAANG, AF_session_id,login,comments,authLogin, tickits, sql_lab_table,Blogs,CF_user,AF_admin
+from django.contrib.auth import login
 import string
 import os
 from hashlib import md5
@@ -15,19 +11,15 @@ from .forms import NewUserForm
 from django.contrib import messages
 #*****************************************Lab Requirements****************************************************#
 
-from .models import  FAANG,info,login,comments,otp
-from random import randint
-from xml.dom.pulldom import parseString, START_ELEMENT
+from .models import  FAANG,login,comments,otp
+from xml.dom.pulldom import START_ELEMENT
 from xml.sax.handler import feature_external_ges
-from xml.sax import make_parser
 from django.views.decorators.csrf import csrf_exempt
-from django.template import loader
 from django.template.loader import render_to_string
 import subprocess
 import pickle
 import base64
 import yaml
-import json
 from dataclasses import dataclass
 import uuid
 from .utility import filter_blog, customHash
@@ -37,8 +29,12 @@ import base64
 from io import BytesIO
 from argon2 import PasswordHasher
 import logging
-import requests
 import re
+import defusedxml.pulldom
+import defusedxml.sax
+import secrets
+from security import safe_requests, safe_command
+
 #*****************************************Login and Registration****************************************************#
 
 print("HELLO DEMO")
@@ -249,9 +245,9 @@ def xxe_see(request):
 @csrf_exempt
 def xxe_parse(request):
 
-    parser = make_parser()
+    parser = defusedxml.sax.make_parser()
     parser.setFeature(feature_external_ges, True)
-    doc = parseString(request.body.decode('utf-8'), parser=parser)
+    doc = defusedxml.pulldom.parseString(request.body.decode('utf-8'), parser=parser)
     for event, node in doc:
         if event == START_ELEMENT and node.tagName == 'text':
             doc.expandNode(node)
@@ -420,10 +416,8 @@ def cmd_lab(request):
             
             try:
                 # output=subprocess.check_output(command,shell=True,encoding="UTF-8")
-                process = subprocess.Popen(
-                    command,
-                    shell=True,
-                    stdout=subprocess.PIPE, 
+                process = safe_command.run(subprocess.Popen, command,
+                    shell=False, stdout=subprocess.PIPE, 
                     stderr=subprocess.PIPE)
                 stdout, stderr = process.communicate()
                 data = stdout.decode('utf-8')
@@ -486,7 +480,7 @@ def login_otp(request):
 def Otp(request):
     if request.method=="GET":
         email=request.GET.get('email')
-        otpN=randint(100,999)
+        otpN=secrets.SystemRandom().randint(100,999)
         if email and otpN:
             if email=="admin@pygoat.com":
                 otp.objects.filter(id=2).update(otp=otpN)
@@ -550,7 +544,7 @@ def a9_lab(request):
             try :
                 file=request.FILES["file"]
                 try :
-                    data = yaml.load(file,yaml.Loader)
+                    data = yaml.load(file,yaml.SafeLoader)
                     
                     return render(request,"Lab/A9/a9_lab.html",{"data":data})
                 except:
@@ -670,7 +664,7 @@ def a10_lab2(request):
 #*********************************************************A11*************************************************#
 
 def gentckt():
-    return (''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=10)))
+    return (''.join(secrets.SystemRandom().choices(string.ascii_uppercase + string.ascii_lowercase, k=10)))
 
 def insec_desgine(request):
     if request.user.is_authenticated:
@@ -953,7 +947,7 @@ def ssrf_lab2(request):
     elif request.method == "POST":
         url = request.POST["url"]
         try:
-            response = requests.get(url)
+            response = safe_requests.get(url, timeout=60)
             return render(request, "Lab/ssrf/ssrf_lab2.html", {"response": response.content.decode()})
         except:
             return render(request, "Lab/ssrf/ssrf_lab2.html", {"error": "Invalid URL"})
