@@ -58,3 +58,9 @@ jobs:
           SECRET=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://app.pixee.ai" | jq -j '.value')
           API_RESPONSE=$(curl -v -X PUT -H "Authorization: Bearer $SECRET" -H "Content-Type: multipart/form-data" -F "file=@defectdojo.findings.json" "https://api.pixee.ai/analysis-input/PixeeSandbox/pygoat-defectdojo/$GITHUB_SHA/defectdojo")
           echo "$API_RESPONSE"
+      - name: "Trigger Pixee Analysis"
+        if: github.event_name == 'pull_request'
+        run: |
+          SECRET=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://app.pixee.ai" | jq -j '.value')
+          API_RESPONSE=$(curl -v -X POST -H "Authorization: Bearer $SECRET" "https://api.pixee.ai/analysis-input/PixeeSandbox/pygoat-defectdojo/${{ github.event.number }}")
+          echo $API_RESPONSE
